@@ -1,11 +1,11 @@
-export {fetchDictionaryData, getDefinitions, getSynonyms, getSound};
+export { fetchDictionaryData, getDefinitions, getSynonyms, getSound };
 
-async function getDefinitions(word){
+async function getDefinitions(word) {
     try {
         const data = await fetchDictionaryData(word);
         if (Array.isArray(data) && data.length > 0) {
             let result = '';
-            let index = 1; 
+            let index = 1;
             data[0].meanings.forEach(meaning => {
                 result += `${index++}. ${meaning.partOfSpeech}\n`;
                 meaning.definitions.forEach(def => {
@@ -23,26 +23,34 @@ async function getDefinitions(word){
     }
 }
 
-async function getSynonyms(word){
+async function getSynonyms(word) {
     try {
         const data = await fetchDictionaryData(word);
-        
+
         // Check if data is an array and has at least one item
         if (Array.isArray(data) && data.length > 0) {
             let result = '';
-            let index = 1; 
+            let index = 1;
+            let empty = true;
             // Iterate through meanings
             data[0].meanings.forEach(meaning => {
                 // Iterate through definitions
                 result += `${index++}. ${meaning.partOfSpeech}\n`;
                 meaning.definitions.forEach(def => {
-                    result += `${def.synonyms}\n `;
+                    if (def.synonyms != "") {
+                        result += `${def.synonyms}\n `;
+                        empty = false;
+                    }
                 });
+
                 result += '\n';
-            });
-            const msg = document.createElement('p');
-            msg.innerText = result.trim();
-            return msg; // Trim whitespace from result
+            }); 
+            if (empty) {
+                return `No synonyms found for ${word}`
+            }
+            else {
+                return result;
+            }
         } else {
             throw new Error('No data found or invalid data structure');
         }
@@ -52,14 +60,14 @@ async function getSynonyms(word){
     }
 }
 
-async function getSound(word){
+async function getSound(word) {
     try {
         const data = await fetchDictionaryData(word);
-        
+
         if (Array.isArray(data) && data.length > 0) {
             let result = []
             data[0].phonetics.forEach(phonetic => {
-                if (phonetic.audio != ""){
+                if (phonetic.audio != "") {
                     result.push(phonetic.audio)
                 }
             });

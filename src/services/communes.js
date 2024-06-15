@@ -51,7 +51,7 @@ async function getNear(code, dist) {
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
             const d = R * c / 1000; // in metres
-            if (d < dist){
+            if (d < dist && d!=0){
                 result+=`${commune.nom} est à ${d} kilomètres\n`;
             }
         });

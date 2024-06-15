@@ -29,11 +29,13 @@ window.onload = function () {
   });
   selectChatbot(sidebarItems[0].name)
 };
-
+const helloCommand =  "Hello will return the name of the api";
 const commands = {
-  Dictionnary: ['Def <word> will return the definitions from the dictionnary', 'Syn <word> will return the synonyms from the dictionnary', 'Snd <word> will return an audio of the pronunciation'],
-  Cards: ['Random'],
-  Communes: ['Pop <code> will return the number of habitants in the city corresponding to the city code']
+  Dictionnary: ['Def <word> will return the definitions from the dictionnary', 'Syn <word> will return the synonyms from the dictionnary', 'Snd <word> will return an audio of the pronunciation', helloCommand],
+  Cards: ['Random will display a random card', helloCommand],
+  Communes: ['Pop <code> will return the number of habitants in the city corresponding to the city code',
+    'Dist <code> <distance> will return the list of cities within the distance radius in km', helloCommand
+  ]
 };
 
 let selectedChatbot;
@@ -47,103 +49,107 @@ async function handleMessage(message) {
   console.log(selectChatbot);
   const cmd = message.split(' ')[0].toUpperCase();
   const arg = message.split(' ')[1];
-  console.log(arg)
   messages[selectedChatbot].push(new Message('User', message, 'text'));
 
-  switch (selectedChatbot) {
-    case 'Dictionnary':
-      switch (cmd) {
-        case 'DEFINE':
-        case 'DEFINITION':
-        case 'DEFINITIONS':
-        case 'DEF': {
-          try {
-            let def = await getDefinitions(arg);
-            messages[selectedChatbot].push(new Message('Bot', def, 'text'));
-            render();
-          } catch (error) {
-            console.error('Error fetching definitions:', error);
+  if (cmd == "HELLO") {
+    messages[selectedChatbot].push(new Message('Bot', `Hello my name is ${selectedChatbot}!`, 'text'));
+  }
+  else {
+    switch (selectedChatbot) {
+      case 'Dictionnary':
+        switch (cmd) {
+          case 'DEFINE':
+          case 'DEFINITION':
+          case 'DEFINITIONS':
+          case 'DEF': {
+            try {
+              let def = await getDefinitions(arg);
+              messages[selectedChatbot].push(new Message('Bot', def, 'text'));
+              render();
+            } catch (error) {
+              console.error('Error fetching definitions:', error);
+            }
+            break;
           }
-          break;
-        }
-        case 'SYNONYM':
-        case 'SYNONYMS':
-        case 'SYN': {
-          try {
-            let syn = await getSynonyms(arg);
-            messages[selectedChatbot].push(new Message('Bot', syn, 'text'));
-            render();
-          } catch (error) {
-            console.error('Error fetching synonyms:', error);
+          case 'SYNONYM':
+          case 'SYNONYMS':
+          case 'SYN': {
+            try {
+              let syn = await getSynonyms(arg);
+              messages[selectedChatbot].push(new Message('Bot', syn, 'text'));
+              render();
+            } catch (error) {
+              console.error('Error fetching synonyms:', error);
+            }
+            break;
           }
-          break;
-        }
-        case 'SND':
-        case 'SOUNDS':
-        case 'SOUND': {
-          try {
-            let sound = await getSound(arg);
-            sound.forEach(snd => {
-              messages[selectedChatbot].push(new Message('Bot', snd, 'audio'));
-            })
+          case 'SND':
+          case 'SOUNDS':
+          case 'SOUND': {
+            try {
+              let sound = await getSound(arg);
+              sound.forEach(snd => {
+                messages[selectedChatbot].push(new Message('Bot', snd, 'audio'));
+              })
 
-            render();
-          } catch (error) {
-            console.error('Error fetching synonyms:', error);
+              render();
+            } catch (error) {
+              console.error('Error fetching synonyms:', error);
+            }
+            break;
           }
-          break;
+          default:
+            messages[selectedChatbot].push(new Message('Bot', "Command not recognized", 'text'));
+            break;
         }
-        default:
-          messages[selectedChatbot].push(new Message('Bot', "Command not recognized", 'text'));
-          break;
-      }
-      break;
-    case 'Cards':
-      switch (cmd) {
-        case 'RANDOM': {
-          try {
-            let url = await fetchRandomCardData();
-            messages[selectedChatbot].push(new Message('Bot', url, 'image'));
-            render();
-          } catch (error) {
-            console.error('Error fetching definitions:', error);
+        break;
+      case 'Cards':
+        switch (cmd) {
+          case 'RANDOM': {
+            try {
+              let url = await fetchRandomCardData();
+              messages[selectedChatbot].push(new Message('Bot', url, 'image'));
+              render();
+            } catch (error) {
+              console.error('Error fetching definitions:', error);
+            }
+            break;
           }
-          break;
+          default:
+            messages[selectedChatbot].push(new Message('Bot', "Command not recognized", 'text'));
+            break;
         }
-        default:
-          messages[selectedChatbot].push(new Message('Bot', "Command not recognized", 'text'));
-          break;
-      }
-      break;
-    case 'Communes':
-      switch (cmd) {
-        case 'POPULATION':
-        case 'POP': {
-          try {
-            let url = await getPopulation(arg);
-            messages[selectedChatbot].push(new Message('Bot', url, 'text'));
-            render();
-          } catch (error) {
-            console.error('Error fetching definitions:', error);
+        break;
+      case 'Communes':
+        switch (cmd) {
+          case 'POPULATION':
+          case 'POP': {
+            try {
+              let url = await getPopulation(arg);
+              messages[selectedChatbot].push(new Message('Bot', url, 'text'));
+              render();
+            } catch (error) {
+              console.error('Error fetching definitions:', error);
+            }
+            break;
           }
-          break;
-        }
-        case 'DISTANCE':
-        case 'DIST': {
-          try {
-            let url = await getNear(arg,message.split(' ')[2] );
-            messages[selectedChatbot].push(new Message('Bot', url, 'text'));
-            render();
-          } catch (error) {
-            console.error('Error fetching definitions:', error);
+          case 'DISTANCE':
+          case 'DIST': {
+            try {
+              let url = await getNear(arg, message.split(' ')[2]);
+              messages[selectedChatbot].push(new Message('Bot', url, 'text'));
+              render();
+            } catch (error) {
+              console.error('Error fetching definitions:', error);
+            }
+            break;
           }
-          break;
+          default:
+            messages[selectedChatbot].push(new Message('Bot', "Command not recognized", 'text'));
+            break;
         }
-        default:
-          messages[selectedChatbot].push(new Message('Bot', "Command not recognized", 'text'));
-          break;
-      }
-      break;
+        break;
+    }
   }
   render();
 }
